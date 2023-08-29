@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ProcessosController } from './processos.controller';
+import { ProcessosService } from './processos.service';
 
-@Module({})
+@Module({
+  controllers: [ProcessosController],
+  providers: [ProcessosService],
+})
 export class ProcessosModule {}

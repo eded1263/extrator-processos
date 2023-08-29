@@ -12,9 +12,13 @@ export const databaseProvider = [
         password: process.env.PG_PASS,
         database: process.env.PG_DATABASE,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        migrations: [__dirname + '/../../migrations/*{.ts,.js}'],
       });
-
-      return dataSource.initialize();
+      const initializer = dataSource.initialize();
+      initializer.then(async (ds) => {
+        await ds.runMigrations();
+      });
+      return initializer;
     },
   },
 ];
