@@ -5,6 +5,9 @@
 # Environment Files
 .env
 
+# Docker Files
+postgres/
+
 # Logs
 logs
 *.log

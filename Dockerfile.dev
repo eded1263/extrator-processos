@@ -1,6 +1,6 @@
 FROM node:18
 WORKDIR /app
-
+RUN npm i -g @nestjs/cli
 COPY package.json package.json
 COPY yarn.lock yarn.lock
 
