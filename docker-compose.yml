@@ -1,0 +1,22 @@
+version: "3"
+services:
+  extrator:
+    build:
+      dockerfile: Dockerfile.dev
+      context: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+  postgres:
+    container_name: postgres
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=processos
