@@ -1,27 +1,30 @@
-// dataHoraInicioLances (Data de início do processo)
-
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { ItensProcesso } from './itens-processo/itens-processo.entity';
+import { BaseEntity } from 'src/common/base.entity';
 
 @Entity()
-export class Processo {
+export class Processo extends BaseEntity {
   @PrimaryColumn()
-  codigoLicitacao: number;
+  codigoLicitacao!: number;
 
   @Column()
-  identificacao: string;
+  identificacao!: string;
 
   @Column()
-  numero: string;
+  numero!: string;
 
   @Column()
-  resumo: string;
+  resumo!: string;
 
   @Column()
   codigoSituacaoEdital: number;
 
   @Column()
-  codigoStatus: number;
+  codigoStatus!: number;
 
   @Column({ type: 'timestamp' })
-  dataHoraInicioLances: Date;
+  dataHoraInicioLances!: Date;
+
+  @OneToMany(() => ItensProcesso, (i: ItensProcesso) => i.processo)
+  itens: ItensProcesso[];
 }
