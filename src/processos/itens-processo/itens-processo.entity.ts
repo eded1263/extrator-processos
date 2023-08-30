@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Processo } from '../processos.entity';
-import { BaseEntity } from 'src/common/base.entity';
+import { BaseEntity } from 'src/common/entity/base.entity';
 
 @Entity({ name: 'itensProcesso' })
 export class ItensProcesso extends BaseEntity {

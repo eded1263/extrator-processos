@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { ItensProcesso } from './itens-processo/itens-processo.entity';
-import { BaseEntity } from 'src/common/base.entity';
+import { BaseEntity } from 'src/common/entity/base.entity';
 
 @Entity()
 export class Processo extends BaseEntity {
