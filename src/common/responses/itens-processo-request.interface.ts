@@ -1,9 +1,10 @@
-import { ItensProcesso } from 'src/processos/itens-processo/itens-processo.entity';
-
-type IRequestItensProcesso = Omit<
-  ItensProcesso,
-  'dataCriacao' | 'dataAtualizacao' | 'dataExclusao'
->;
+export interface IRequestItensProcesso {
+  descricao: string;
+  valorReferencia: number;
+  quantidade: number;
+  participacao: { codigo: number };
+  codigo: number;
+}
 
 export interface IItensProcessoRequest {
   itens: {

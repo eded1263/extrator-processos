@@ -6,7 +6,7 @@ export class CreateTableLockExecucao1693352402337
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
           CREATE TABLE "lockExecucao"(
-            emExecucao boolean 
+            em_execucao boolean 
           )  
       `);
   }

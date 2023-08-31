@@ -2,9 +2,9 @@ import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { ItensProcesso } from './itens-processo/itens-processo.entity';
 import { BaseEntity } from 'src/common/entity/base.entity';
 
-@Entity()
+@Entity({ name: 'processos' })
 export class Processo extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'codigo_licitacao' })
   codigoLicitacao!: number;
 
   @Column()
@@ -16,13 +16,13 @@ export class Processo extends BaseEntity {
   @Column()
   resumo!: string;
 
-  @Column()
+  @Column({ name: 'codigo_situacao_edital' })
   codigoSituacaoEdital: number;
 
-  @Column()
+  @Column({ name: 'codigo_status' })
   codigoStatus!: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', name: 'data_hora_inicio_lances' })
   dataHoraInicioLances!: Date;
 
   @OneToMany(() => ItensProcesso, (i: ItensProcesso) => i.processo)

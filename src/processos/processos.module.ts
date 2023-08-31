@@ -10,5 +10,6 @@ import { HttpModule } from '@nestjs/axios';
   controllers: [ProcessosController],
   providers: [...processosProvider, ProcessosService],
   imports: [ItensProcessoModule, DatabaseModule, HttpModule],
+  exports: [...processosProvider],
 })
 export class ProcessosModule {}

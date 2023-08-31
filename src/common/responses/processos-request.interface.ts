@@ -1,9 +1,12 @@
-import { Processo } from 'src/processos/processos.entity';
-
-type IRequestProcesso = Omit<
-  Processo,
-  'dataCriacao' | 'dataAtualizacao' | 'dataExclusao'
->;
+export interface IRequestProcesso {
+  codigoLicitacao: number;
+  identificacao: string;
+  numero: string;
+  resumo: string;
+  codigoSituacaoEdital: number;
+  status: { codigo: number };
+  dataHoraInicioLances: Date;
+}
 
 export interface IProcessosRequest {
   result: IRequestProcesso[];

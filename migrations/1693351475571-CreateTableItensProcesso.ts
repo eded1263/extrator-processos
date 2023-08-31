@@ -7,14 +7,14 @@ export class CreateTableItensProcesso1693351475571
     await queryRunner.query(`
         CREATE TABLE "itensProcesso"(
             id SERIAL NOT NULL UNIQUE,
-            descricao varchar(255) NOT NULL,
-            valorReferencia real NOT NULL,
-            quantidade real NOT NULL,
-            codigoParticipacao smallint NOT NULL,
+            descricao text NOT NULL,
+            valor_referencia decimal(10,2) NOT NULL,
+            quantidade decimal(10,2) NOT NULL,
+            codigo_participacao smallint NOT NULL,
             codigo smallint NOT NULL,
-            codigoProcesso integer NOT NULL,
+            codigo_processo integer NOT NULL,
             PRIMARY KEY (id),
-            FOREIGN KEY (codigoProcesso) REFERENCES "processos" (codigoLicitacao)
+            FOREIGN KEY (codigo_processo) REFERENCES "processos" (codigo_licitacao)
         )  
     `);
   }

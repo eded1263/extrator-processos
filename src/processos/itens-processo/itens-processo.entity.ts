@@ -6,23 +6,22 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Processo } from '../processos.entity';
-import { BaseEntity } from 'src/common/entity/base.entity';
 
 @Entity({ name: 'itensProcesso' })
-export class ItensProcesso extends BaseEntity {
+export class ItensProcesso {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   descricao: string;
 
-  @Column({ type: 'real' })
+  @Column({ type: 'real', name: 'valor_referencia' })
   valorReferencia: number;
 
   @Column({ type: 'real' })
   quantidade: number;
 
-  @Column()
+  @Column({ name: 'codigo_participacao' })
   codigoParticipacao: number;
 
   @Column()
@@ -30,7 +29,7 @@ export class ItensProcesso extends BaseEntity {
 
   @ManyToOne(() => Processo, (p: Processo) => p.itens)
   @JoinColumn({
-    name: 'codigoProcesso',
+    name: 'codigo_processo',
     referencedColumnName: 'codigoLicitacao',
   })
   processo: Processo;
