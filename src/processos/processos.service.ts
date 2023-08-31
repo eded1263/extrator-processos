@@ -34,7 +34,7 @@ export class ProcessosService {
     let processos: IRequestProcesso[] = [];
     const dataInicial = new Date();
     const dataFinal = new Date();
-    dataInicial.setDate(dataInicial.getDate() - 3);
+    dataFinal.setDate(dataInicial.getDate() + 30);
     do {
       const { data } = await this.httpService.axiosRef.get<IProcessosRequest>(
         'https://compras.api.portaldecompraspublicas.com.br/v2/licitacao/processos',

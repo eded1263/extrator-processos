@@ -29,7 +29,7 @@ export class ItensProcessoService {
 
   public async getItensProcesso(processo: Processo) {
     let pagina = 1;
-    let ultimaPagina = 2;
+    let ultimaPagina = 1;
     let itens: IRequestItensProcesso[] = [];
     do {
       const { data } =
@@ -46,7 +46,7 @@ export class ItensProcessoService {
         ultimaPagina = data.itens.pageCount;
         itens = [...itens, ...data.itens.result];
       }
-    } while (ultimaPagina > pagina);
+    } while (ultimaPagina >= pagina);
 
     return itens;
   }
