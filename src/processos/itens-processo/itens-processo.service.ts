@@ -17,14 +17,11 @@ export class ItensProcessoService {
     private itensProcessoRepository: Repository<ItensProcesso>,
   ) {}
   public async buscarItensProcessos(processosExternos: Processo[]) {
-    // const queries = processosExternos.map(async (processoExt) => {
     for (let i = 0; i < processosExternos.length; i++) {
       const processoExt = processosExternos[i];
       const itens = await this.getItensProcesso(processoExt);
       await this.updateItens(processoExt, itens);
     }
-    // });
-    // return Promise.all(queries);
   }
 
   public async getItensProcesso(processo: Processo) {
@@ -32,19 +29,23 @@ export class ItensProcessoService {
     let ultimaPagina = 1;
     let itens: IRequestItensProcesso[] = [];
     do {
-      const { data } =
-        await this.httpService.axiosRef.get<IItensProcessoRequest>(
-          `https://compras.api.portaldecompraspublicas.com.br/v2/licitacao/${processo.codigoLicitacao}/itens`,
-          {
-            params: {
-              pagina,
+      try {
+        const { data } =
+          await this.httpService.axiosRef.get<IItensProcessoRequest>(
+            `https://compras.api.portaldecompraspublicas.com.br/v2/licitacao/${processo.codigoLicitacao}/itens`,
+            {
+              params: {
+                pagina,
+              },
             },
-          },
-        );
-      pagina++;
-      if (data.itens) {
-        ultimaPagina = data.itens.pageCount;
-        itens = [...itens, ...data.itens.result];
+          );
+        pagina++;
+        if (data.itens) {
+          ultimaPagina = data.itens.pageCount;
+          itens = [...itens, ...data.itens.result];
+        }
+      } catch (e) {
+        // TODO: Analisar o porquê do erro 500
       }
     } while (ultimaPagina >= pagina);
 
@@ -52,7 +53,7 @@ export class ItensProcessoService {
   }
   public async updateItens(processo: Processo, itens: IRequestItensProcesso[]) {
     await this.itensProcessoRepository.delete({
-      processo: { codigoLicitacao: processo.codigoLicitacao },
+      processo,
     });
 
     const itensParaSalvar = this.itensProcessoRepository.create(

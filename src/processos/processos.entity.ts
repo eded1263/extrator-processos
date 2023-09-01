@@ -25,6 +25,8 @@ export class Processo extends BaseEntity {
   @Column({ type: 'timestamp', name: 'data_hora_inicio_lances' })
   dataHoraInicioLances!: Date;
 
-  @OneToMany(() => ItensProcesso, (i: ItensProcesso) => i.processo)
+  @OneToMany(() => ItensProcesso, (i: ItensProcesso) => i.processo, {
+    eager: true,
+  })
   itens: ItensProcesso[];
 }

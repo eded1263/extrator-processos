@@ -10,8 +10,8 @@ export class CreateTableItensProcesso1693351475571
             descricao text NOT NULL,
             valor_referencia decimal(10,2) NOT NULL,
             quantidade decimal(10,2) NOT NULL,
-            codigo_participacao smallint NOT NULL,
-            codigo smallint NOT NULL,
+            codigo_participacao integer NOT NULL,
+            codigo integer NOT NULL,
             codigo_processo integer NOT NULL,
             PRIMARY KEY (id),
             FOREIGN KEY (codigo_processo) REFERENCES "processos" (codigo_licitacao)

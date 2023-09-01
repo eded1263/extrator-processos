@@ -15,7 +15,6 @@ export class CreateTableProcessos1693350670799 implements MigrationInterface {
         )
     `);
   }
-
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
         DROP TABLE "processos";

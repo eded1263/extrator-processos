@@ -1,5 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { In, Not, Repository } from 'typeorm';
+import {
+  In,
+  MoreThanOrEqual,
+  Not,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { Processo } from './processos.entity';
 import { Repositories } from 'src/constants';
 import { ItensProcessoService } from './itens-processo/itens-processo.service';
@@ -8,6 +14,7 @@ import {
   IProcessosRequest,
   IRequestProcesso,
 } from 'src/common/responses/processos-request.interface';
+import { IQueryProcessos } from './interfaces/query-processos.interface';
 
 @Injectable()
 export class ProcessosService {
@@ -23,7 +30,7 @@ export class ProcessosService {
     const processosExternos = await this.buscarProcessosExternos();
     await this.upsertProcessos(processosExternos);
     await this.itensProcessoService.buscarItensProcessos(
-      await this.getProcessos(processosExternos),
+      await this.listProcessos(processosExternos),
     );
     await this.deletarProcessosAntigos(processosExternos);
   }
@@ -34,7 +41,7 @@ export class ProcessosService {
     let processos: IRequestProcesso[] = [];
     const dataInicial = new Date();
     const dataFinal = new Date();
-    dataFinal.setDate(dataInicial.getDate() + 30);
+    dataFinal.setDate(dataInicial.getDate() + 29);
     do {
       const { data } = await this.httpService.axiosRef.get<IProcessosRequest>(
         'https://compras.api.portaldecompraspublicas.com.br/v2/licitacao/processos',
@@ -67,9 +74,14 @@ export class ProcessosService {
         dataHoraInicioLances: processoExt.dataHoraInicioLances,
       }),
     );
-    await this.processosRepository.upsert(processosToUpsert, [
-      'codigoLicitacao',
-    ]);
+    console.log('cheguei aqui');
+    await Promise.all(
+      processosToUpsert.map(
+        async (p) =>
+          await this.processosRepository.upsert(p, ['codigoLicitacao']),
+      ),
+    );
+    console.log('cheguei aqui no final');
   }
 
   private getProcessosExternosIds(processosExternos: IRequestProcesso[]) {
@@ -83,11 +95,62 @@ export class ProcessosService {
     });
   }
 
-  private getProcessos(processosExternos: IRequestProcesso[]) {
+  private listProcessos(processosExternos: IRequestProcesso[]) {
     return this.processosRepository.find({
       where: {
         codigoLicitacao: In(this.getProcessosExternosIds(processosExternos)),
       },
     });
+  }
+
+  public async getProcessos(opcoes: IQueryProcessos) {
+    let query = this.processosRepository.createQueryBuilder('pr');
+    query.leftJoinAndSelect(
+      'pr.itens',
+      'i',
+      'pr.codigo_licitacao = i.codigo_processo',
+    );
+    query = this.filtrar(query, opcoes);
+
+    const countQuery = query.clone();
+    const total = await countQuery.getCount();
+    const processos = await query
+      .skip((opcoes.pagina - 1) * opcoes.limite)
+      .take(opcoes.limite)
+      .getMany();
+
+    return {
+      processos,
+      total,
+      pagina: opcoes.pagina,
+      limite: opcoes.limite,
+      totalPaginas: Math.ceil(total / opcoes.limite),
+    };
+  }
+  private filtrar(
+    query: SelectQueryBuilder<Processo>,
+    opcoes: IQueryProcessos,
+  ) {
+    if (opcoes.resumo) {
+      query.andWhere('pr.resumo ILIKE (:resumo)', {
+        resumo: `%${opcoes.resumo}%`,
+      });
+    }
+    if (opcoes.numero) {
+      query.andWhere('pr.numero ILIKE (:numero)', {
+        numero: `%${opcoes.numero}%`,
+      });
+    }
+    if (opcoes.dataInicio) {
+      query.andWhere({
+        dataHoraInicioLances: MoreThanOrEqual(new Date(opcoes.dataInicio)),
+      });
+    }
+    if (opcoes.descricaoItem) {
+      query.andWhere('i.descricao ILIKE (:descricaoItem)', {
+        descricaoItem: `%${opcoes.descricaoItem}%`,
+      });
+    }
+    return query;
   }
 }
