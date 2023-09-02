@@ -12,5 +12,5 @@ Após buildar a primeira vez, pode ser rodado apenas com o comando ```docker com
 
 Sem o Docker:
 - Configurar váriaveis de ambiente
-- ```yarn i```
+- ```yarn```
 - ```yarn start```
