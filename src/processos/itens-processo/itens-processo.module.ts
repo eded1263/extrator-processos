@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { itensProcessoProvider } from './itens-processo.provider';
+import { ItensProcessoRepository } from './itens-processo.repository';
 import { ItensProcessoService } from './itens-processo.service';
 import { DatabaseModule } from 'src/database/database.module';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  providers: [...itensProcessoProvider, ItensProcessoService],
+  providers: [ItensProcessoRepository, ItensProcessoService],
   exports: [ItensProcessoService],
   imports: [DatabaseModule, HttpModule],
 })

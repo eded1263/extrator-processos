@@ -1,26 +1,22 @@
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable } from '@nestjs/common';
-import { Repositories } from 'src/constants';
-import { ItensProcesso } from './itens-processo.entity';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import {
   IItensProcessoRequest,
   IRequestItensProcesso,
 } from 'src/common/responses/itens-processo-request.interface';
 import { Processo } from '../processos.entity';
+import { ItensProcessoRepository } from './itens-processo.repository';
 
 @Injectable()
 export class ItensProcessoService {
   constructor(
     private readonly httpService: HttpService,
-    @Inject(Repositories.ITENS_PROCESSO_REPOSITORY)
-    private itensProcessoRepository: Repository<ItensProcesso>,
+    private itensProcessoRepository: ItensProcessoRepository,
   ) {}
   public async buscarItensProcessos(processosExternos: Processo[]) {
     for (let i = 0; i < processosExternos.length; i++) {
       const processoExt = processosExternos[i];
-      const itens = await this.getItensProcesso(processoExt);
-      await this.updateItens(processoExt, itens);
+      await this.getItensProcesso(processoExt);
     }
   }
 
@@ -48,15 +44,17 @@ export class ItensProcessoService {
         // TODO: Analisar o porquê do erro 500
       }
     } while (ultimaPagina >= pagina);
-
+    if (itens.length > 0) {
+      await this.updateItens(processo, itens);
+    }
     return itens;
   }
   public async updateItens(processo: Processo, itens: IRequestItensProcesso[]) {
-    await this.itensProcessoRepository.delete({
+    await this.itensProcessoRepository.deleteItens({
       processo,
     });
 
-    const itensParaSalvar = this.itensProcessoRepository.create(
+    await this.itensProcessoRepository.salvarItens(
       itens.map((i) => ({
         processo,
         quantidade: i.quantidade,
@@ -66,7 +64,5 @@ export class ItensProcessoService {
         codigo: i.codigo,
       })),
     );
-
-    return await this.itensProcessoRepository.save(itensParaSalvar);
   }
 }

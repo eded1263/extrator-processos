@@ -1,13 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  In,
-  MoreThanOrEqual,
-  Not,
-  Repository,
-  SelectQueryBuilder,
-} from 'typeorm';
+import { In, MoreThanOrEqual, Not, SelectQueryBuilder } from 'typeorm';
 import { Processo } from './processos.entity';
-import { Repositories } from 'src/constants';
 import { ItensProcessoService } from './itens-processo/itens-processo.service';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -15,12 +8,13 @@ import {
   IRequestProcesso,
 } from 'src/common/responses/processos-request.interface';
 import { IQueryProcessos } from './interfaces/query-processos.interface';
+import { ProcessosRepository } from './processos.repository';
+import { Pagination } from 'src/common/interfaces/pagination.interface';
 
 @Injectable()
 export class ProcessosService {
   constructor(
-    @Inject(Repositories.PROCESSOS_REPOSITORY)
-    private processosRepository: Repository<Processo>,
+    private processosRepository: ProcessosRepository,
     @Inject(ItensProcessoService)
     private itensProcessoService: ItensProcessoService,
     private readonly httpService: HttpService,
@@ -63,25 +57,7 @@ export class ProcessosService {
   }
 
   private async upsertProcessos(processosExternos: IRequestProcesso[]) {
-    const processosToUpsert: Partial<Processo>[] = processosExternos.map(
-      (processoExt) => ({
-        codigoLicitacao: processoExt.codigoLicitacao,
-        identificacao: processoExt.identificacao,
-        numero: processoExt.numero,
-        resumo: processoExt.resumo,
-        codigoSituacaoEdital: processoExt.codigoSituacaoEdital,
-        codigoStatus: processoExt.status.codigo,
-        dataHoraInicioLances: processoExt.dataHoraInicioLances,
-      }),
-    );
-    console.log('cheguei aqui');
-    await Promise.all(
-      processosToUpsert.map(
-        async (p) =>
-          await this.processosRepository.upsert(p, ['codigoLicitacao']),
-      ),
-    );
-    console.log('cheguei aqui no final');
+    await this.processosRepository.upsertProcessos(processosExternos);
   }
 
   private getProcessosExternosIds(processosExternos: IRequestProcesso[]) {
@@ -90,43 +66,38 @@ export class ProcessosService {
 
   private async deletarProcessosAntigos(processosExternos: IRequestProcesso[]) {
     const idsProcessos = this.getProcessosExternosIds(processosExternos);
-    await this.processosRepository.softDelete({
+
+    await this.processosRepository.deleteProcesso({
       codigoLicitacao: Not(In(idsProcessos)),
     });
   }
 
   private listProcessos(processosExternos: IRequestProcesso[]) {
-    return this.processosRepository.find({
+    return this.processosRepository.findProcessos({
       where: {
         codigoLicitacao: In(this.getProcessosExternosIds(processosExternos)),
       },
     });
   }
 
-  public async getProcessos(opcoes: IQueryProcessos) {
-    let query = this.processosRepository.createQueryBuilder('pr');
-    query.leftJoinAndSelect(
-      'pr.itens',
-      'i',
-      'pr.codigo_licitacao = i.codigo_processo',
-    );
-    query = this.filtrar(query, opcoes);
-
-    const countQuery = query.clone();
-    const total = await countQuery.getCount();
-    const processos = await query
-      .skip((opcoes.pagina - 1) * opcoes.limite)
-      .take(opcoes.limite)
-      .getMany();
+  public async getProcessos(
+    opcoes: IQueryProcessos,
+  ): Promise<Pagination<Processo>> {
+    const { itens, total } =
+      await this.processosRepository.getProcessosWithCount(
+        (query) => this.filtrar(query, opcoes),
+        { skip: (opcoes.pagina - 1) * opcoes.limite, take: opcoes.limite },
+      );
 
     return {
-      processos,
       total,
+      itens,
       pagina: opcoes.pagina,
       limite: opcoes.limite,
       totalPaginas: Math.ceil(total / opcoes.limite),
     };
   }
+
   private filtrar(
     query: SelectQueryBuilder<Processo>,
     opcoes: IQueryProcessos,
